@@ -1,6 +1,14 @@
 # Pyspark playground
 
 ## Infra
+- Go to docker directory and build spabox image (see docker/Dockerfile header comment)
+- Run asdf.py script:
+```
+docker run -it --rm -v $PWD:/share spabox /opt/spark/bin/spark-submit /share/asdf.py
+```
+~~## Infra~~
+> NOTE: port 7077 doesn't seem to work as RPC from outside, so we launch pyspark INSIDE container
+> NOTE: skip this section
 - Download and run spark in docker compose
 ```
 wget https://github.com/bitnami/containers/raw/refs/heads/main/bitnami/spark/docker-compose.yml
@@ -30,3 +38,6 @@ SPARK_LOCAL_IP=localhost pyspark --master spark://localhost:7077
 
 ## Quiz solution with sqlite
 - inside test_sqlite.py
+
+## Quiz solution with pyspark
+- Spark does not enforce unique or primary key constrains like SQL DBs do. So we have to check consistency on our own

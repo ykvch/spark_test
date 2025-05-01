@@ -1,23 +1,46 @@
-from pyspark.sql import SparkSession  # SparkContext
-from pyspark import SparkContext, SparkConf
-import pytest
 import logging
 
+import random
+import faker
+import pytest
+from pyspark.sql import SparkSession, DataFrame
+
+FAKE = faker.Faker()
 LOG = logging.getLogger(__name__)
+ARTISTS_COUNT = 5
+
+
+@pytest.fixture(scope="session")
+def spark():
+    LOG.info(SparkSession.getActiveSession())
+    return SparkSession.builder.getOrCreate()
+
 
 @pytest.fixture
-def sc():
-    # return SparkContext("local", "SKU")
-    LOG.info(SparkSession.getActiveSession())
-    return SparkSession.builder.appName("SparkSample").master("spark://127.0.0.1:7077").getOrCreate()
-    # return SparkSession.builder.remote("sc://127.0.0.1:7077").getOrCreate()
-    # return SparkSession.builder.master("spark://d91d232e5b93:7077").getOrCreate()
+def inconsistend_data(spark):
+    authors = spark.createDataFrame(
+        enumerate(FAKE.name() for _ in range(ARTISTS_COUNT)),
+        schema="author_id: int, name: string",
+    )
+    # should be small, so use list
+    # NOTE: toLocalIterator
+    author_ids = [i.author_id for i in authors.select("author_id").collect()]
 
-    conf = SparkConf().setAppName('hello').setMaster('spark://127.0.0.1:7077')
-    # conf = SparkConf().setAppName('hello').setMaster('spark://d91d232e5b93:7077')
-    return SparkContext(conf=conf)
+    # NOTE: withColumn
+    books = spark.createDataFrame(
+        ((FAKE.catch_phrase(), 2020 + i, i) for i in author_ids),
+        schema="title: string, year: int, author_id: int",
+    )
+
+    return authors.filter(~authors.author_id.isin(random.sample(author_ids, 2))), books
 
 
-def test_sales(sc):
+def test_books(spark, inconsistend_data):
     LOG.info("start test")
-    assert True
+    authors, books = inconsistend_data
+
+    authors.show()
+    authors.printSchema()
+    books.show()
+    books.printSchema()
+    assert not authors
