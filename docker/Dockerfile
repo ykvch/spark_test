@@ -12,7 +12,7 @@ FROM spark:python3
 ARG HOST_UID=1000
 ARG HOST_GID=1000
 USER root
-RUN pip install pyspark pandas pytest faker
+RUN pip --no-cache-dir install faker pandas pyspark pytest 
 RUN groupadd spa -g $HOST_GID && \
 useradd spa -u $HOST_UID -g $HOST_GID && \
 mkdir /home/spa && chown -R $HOST_UID:$HOST_GID /home/spa

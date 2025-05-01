@@ -2,9 +2,9 @@
 
 ## Infra
 - Go to docker directory and build spabox image (see docker/Dockerfile header comment)
-- Run asdf.py script:
+- Run test script:
 ```
-docker run -it --rm -v $PWD:/share spabox /opt/spark/bin/spark-submit /share/asdf.py
+docker run -it --rm -v $PWD:/share spabox pytest /share/test_spark.py
 ```
 ~~## Infra~~
 > NOTE: port 7077 doesn't seem to work as RPC from outside, so we launch pyspark INSIDE container
